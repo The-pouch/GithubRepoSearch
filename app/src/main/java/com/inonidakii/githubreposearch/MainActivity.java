@@ -3,6 +3,7 @@ package com.inonidakii.githubreposearch;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
@@ -36,19 +37,29 @@ public class MainActivity extends AppCompatActivity {
         String githubSearchQuery = eSearchBoxEditText.getText().toString();
         URL githubSearchUrl = NetworkUtils.buildUrl(githubSearchQuery);
         eUrlDisplayTextView.setText(githubSearchUrl.toString());
-        String response = null;
-        try {
-            response = NetworkUtils.getResponseFromHttpUrl(githubSearchUrl);
-            eSearchResultsTextView.setText(response);
-        } catch (Exception exception) {
-            Log.e(this.toString(), exception.toString());
-        }
-    // TODO (4) Create a new GithubQueryTask and call its execute method, passing in the url to query
+        new GithubQueryTask().execute(githubSearchUrl);
+
     }
 
-    // TODO (1) Create a class called GithubQueryTask that extends AsyncTask<URL, Void, String>
-    // TODO (2) Override the doInBackground method to perform the query. Return the results. (Hint: You've already written the code to perform the query)
-    // TODO (3) Override onPostExecute to display the results in the TextView
+    class GithubQueryTask extends AsyncTask<URL, Void, String>{
+        String response = null;
+        @Override
+        protected String doInBackground(URL... urls) {
+
+            try {
+                response = NetworkUtils.getResponseFromHttpUrl(urls[0]);
+            } catch (Exception exception) {
+                Log.e(this.toString(), exception.toString());
+            }
+            return response;
+        }
+
+        @Override
+        protected void onPostExecute(String s) {
+            super.onPostExecute(s);
+            eSearchResultsTextView.setText(s);
+        }
+    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
