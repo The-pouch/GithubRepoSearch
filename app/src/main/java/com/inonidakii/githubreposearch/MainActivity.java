@@ -4,6 +4,7 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -35,9 +36,14 @@ public class MainActivity extends AppCompatActivity {
         String githubSearchQuery = eSearchBoxEditText.getText().toString();
         URL githubSearchUrl = NetworkUtils.buildUrl(githubSearchQuery);
         eUrlDisplayTextView.setText(githubSearchUrl.toString());
+        String response = null;
+        try {
+            response = NetworkUtils.getResponseFromHttpUrl(githubSearchUrl);
+            eSearchResultsTextView.setText(response);
+        } catch (Exception exception) {
+            Log.e(this.toString(), exception.toString());
+        }
 
-        // TODO (2) Call getResponseFromHttpUrl and display the results in mSearchResultsTextView
-        // TODO (3) Surround the call to getResponseFromHttpUrl with a try / catch block to catch an IOException
     }
 
     @Override
