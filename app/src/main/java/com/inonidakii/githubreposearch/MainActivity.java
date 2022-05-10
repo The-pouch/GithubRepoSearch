@@ -1,17 +1,18 @@
 package com.inonidakii.githubreposearch;
 
-import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
-
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.EditText;
+import android.widget.ProgressBar;
 import android.widget.TextView;
-import android.widget.Toast;
+
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
 
 import com.inonidakii.githubreposearch.utilities.NetworkUtils;
 
@@ -23,9 +24,9 @@ public class MainActivity extends AppCompatActivity {
     TextView eUrlDisplayTextView;
     TextView eSearchResultsTextView;
 
-    // TODO (12) Create a variable to store a reference to the error message TextView
+    TextView eErrorDisplayTextView;
+    ProgressBar eResultsProgressBar;
 
-    // TODO (24) Create a ProgressBar variable to store a reference to the ProgressBar
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -34,10 +35,9 @@ public class MainActivity extends AppCompatActivity {
         eSearchBoxEditText = findViewById(R.id.et_search_box);
         eUrlDisplayTextView = findViewById(R.id.tv_url_display);
         eSearchResultsTextView = findViewById(R.id.tv_github_search_results_json);
+        eErrorDisplayTextView = findViewById(R.id.tv_error_message_display);
 
-        // TODO (13) Get a reference to the error TextView using findViewById
-
-        // TODO (25) Get a reference to the ProgressBar using findViewById
+        eResultsProgressBar = findViewById(R.id.pb_loading_indicator);
     }
 
     /**
@@ -54,32 +54,14 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    // TODO (14) Create a method called showJsonDataView to show the data and hide the error
+    private void showJsonDataView() {
+        eSearchResultsTextView.setVisibility(View.VISIBLE);
+        eErrorDisplayTextView.setVisibility(View.INVISIBLE);
+    }
 
-    // TODO (15) Create a method called showErrorMessage to show the error and hide the data
-
-    class GithubQueryTask extends AsyncTask<URL, Void, String>{
-        // TODO (26) Override onPreExecute to set the loading indicator to visible
-        String response = null;
-        @Override
-        protected String doInBackground(URL... urls) {
-
-            try {
-                response = NetworkUtils.getResponseFromHttpUrl(urls[0]);
-            } catch (Exception exception) {
-                Log.e(this.toString(), exception.toString());
-            }
-            return response;
-        }
-
-        @Override
-        protected void onPostExecute(String s) {
-            // TODO (27) As soon as the loading is complete, hide the loading indicator
-            // TODO (17) Call showJsonDataView if we have valid, non-null results
-            super.onPostExecute(s);
-            eSearchResultsTextView.setText(s);
-            // TODO (16) Call showErrorMessage if the result is null in onPostExecute
-        }
+    private void showErrorMessage() {
+        eSearchResultsTextView.setVisibility(View.INVISIBLE);
+        eErrorDisplayTextView.setVisibility(View.VISIBLE);
     }
 
     @Override
@@ -97,6 +79,38 @@ public class MainActivity extends AppCompatActivity {
         }
         return super.onOptionsItemSelected(item);
 
+    }
+
+    class GithubQueryTask extends AsyncTask<URL, Void, String> {
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            eResultsProgressBar.setVisibility(View.VISIBLE);
+        }
+
+        @Override
+        protected String doInBackground(URL... urls) {
+            String response = null;
+            try {
+                response = NetworkUtils.getResponseFromHttpUrl(urls[0]);
+            } catch (Exception exception) {
+                Log.e(this.toString(), exception.toString());
+            }
+            return response;
+        }
+
+        @Override
+        protected void onPostExecute(String githubSearchResults) {
+            eResultsProgressBar.setVisibility(View.INVISIBLE);
+            super.onPostExecute(githubSearchResults);
+            if (githubSearchResults != null && !githubSearchResults.equals("")) {
+                showJsonDataView();
+                eSearchResultsTextView.setText(githubSearchResults);
+            }
+            else
+                showErrorMessage();
+        }
     }
 
 }
