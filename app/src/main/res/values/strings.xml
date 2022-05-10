@@ -3,4 +3,5 @@
     <string name="enter_github_repo">Enter github repo.</string>
     <string name="place_query_for_repo">Place query for repo</string>
     <string name="search">Search</string>
+    <!--TODO (1) Add a string stating that an error has occurred-->
 </resources>
